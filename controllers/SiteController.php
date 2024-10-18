@@ -75,6 +75,21 @@ class SiteController extends Controller
 
     }
 
+    public function actionSearchVendors()
+{
+    $query = Yii::$app->request->get('q', '');  
+    $vendors = Vendor::find()
+        ->andFilterWhere(['like', 'name', $query]) 
+        ->asArray() 
+        ->all();
+
+    Yii::$app->response->format = yii\web\Response::FORMAT_JSON;
+
+    return [
+        'vendors' => $vendors
+    ];
+}
+
     public function actionExam()
     {
         $vendorId = Yii::$app->request->get('id');

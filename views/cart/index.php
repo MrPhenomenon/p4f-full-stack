@@ -105,19 +105,22 @@ use yii\helpers\Url;
                         <hr>
                         <form action="<?= yii\helpers\Url::to(['cart/process']) ?>" method="POST" id="payment-form">
 
-                            <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->csrfToken ?>">
+                            <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>"
+                                value="<?= Yii::$app->request->csrfToken ?>">
                             <div id="card-element" class="my-3"><!-- A Stripe Element will be inserted here. --></div>
                             <div id="card-errors" role="alert"><!-- display form errors. --></div>
                             <!-- Button trigger modal -->
-                             
+
                             <div class="text-end">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"    data-bs-target="#staticBackdrop">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#staticBackdrop">
                                     Pay Now
                                 </button>
                             </div>
                         </form>
                         <!-- Modal -->
-                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -125,14 +128,20 @@ use yii\helpers\Url;
 
                                     </div>
                                     <div class="modal-body">
-                                    <p>You are about to be charged <strong >&dollar;<span id="chargeAmount"><?= $subtotal ?></span></strong></p>
+                                        <p>You are about to be charged <strong>&dollar;<span
+                                                    id="chargeAmount"><?= $subtotal ?></span></strong></p>
 
                                         <p>This action is irreversible. Please confirm that you wish to proceed with the
                                             payment.</p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary bg-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <button id="confirmPayment" type="submit" class="btn btn-primary">Proceed</button>
+                                        <button id="cancel" type="button" class="btn btn-secondary bg-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button id="confirmPayment" type="submit" class="btn btn-primary">
+                                            <span id="loader" class="spinner-border visually-hidden spinner-border-sm"
+                                                aria-hidden="true"></span>
+                                            <span id="paynow">Process</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -151,11 +160,11 @@ use yii\helpers\Url;
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 
-  var removeFromCartUrl = '<?= Url::to(["cart/remove"]) ?>';
+    var removeFromCartUrl = '<?= Url::to(["cart/remove"]) ?>';
 
     var stripe = Stripe('pk_test_51Q9lXZF80WCmgfZEd8zuKAjOx9Z4vBqHh9rsfgmWT8a95B0dKETSwYLqrHC1wC0qqFIBH9ahpQrQAw9zdrfT9stR003UILjP9K');
     var elements = stripe.elements();
-    
+
     var cardElement = elements.create('card');
     cardElement.mount('#card-element');
 
@@ -163,10 +172,21 @@ use yii\helpers\Url;
 
     // This event listener is for the modal's confirm button
     document.getElementById("confirmPayment").addEventListener("click", function () {
+
+        document.getElementById('paynow').textContent = 'Confirming..'
+        document.getElementById('loader').classList.remove('visually-hidden');
+        document.getElementById('confirmPayment').disabled = true
+
         stripe.createToken(cardElement).then(function (result) {
+
             if (result.error) {
                 // Show error in #card-errors
                 document.getElementById('card-errors').textContent = result.error.message;
+
+                document.getElementById('paynow').textContent = 'Error, please try again'
+                document.getElementById('confirmPayment').classList.add('bg-danger')
+                document.getElementById('loader').classList.add('visually-hidden');
+
             } else {
                 // Send the token to your server
                 var hiddenInput = document.createElement('input');
@@ -180,4 +200,12 @@ use yii\helpers\Url;
             }
         });
     });
+
+    document.getElementById("cancel").addEventListener("click", function () {
+        document.getElementById('paynow').textContent = 'Process'
+        document.getElementById('confirmPayment').classList.remove('bg-danger')
+        document.getElementById('loader').classList.add('visually-hidden')
+        document.getElementById('confirmPayment').disabled = false
+
+    })
 </script>

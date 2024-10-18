@@ -1204,3 +1204,12 @@ section .why-us{
   margin-right: auto;
   background-color: var(--accent-color);
 }
+
+#billing #confirmPayment{
+  width: auto;
+  min-width: 7rem;
+  
+}
+#billing .bg-danger{
+  border: none;
+}

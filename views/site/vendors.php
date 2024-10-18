@@ -22,17 +22,21 @@
   </nav>
 </div><!-- End Page Title -->
 
+
+
+
 <section id="allvendors" class="allvendors container section mt-5">
   <div class="row section-title">
     <div class="col-12 col-md-8">
       <p>All Vendors</p>
     </div>
 
+
     <div class="col-12 col-md-4">
       <div class="search">
         <i class="bi bi-search"></i>
-        <input type="text" class="form-control" placeholder="Search">
-        <button class="btn btn-primary">Search</button>
+        <input type="text" id="vendorSearch" class="form-control" placeholder="Search for vendors...">
+
       </div>
     </div>
 
@@ -40,6 +44,11 @@
   </div>
   </div><!-- End Section Title -->
   <div class="container">
+
+    <div id="loader" class="loader visually-hidden d-flex justify-content-center my-5 py-5">
+      <span class="spinner-border" role="status" aria-hidden="true"></span>
+    </div>
+
     <div class="row gy-4 text-start fw-lighter">
       <?php foreach ($vendors as $vendor): ?>
 
@@ -70,3 +79,55 @@
     </div>
 
   </div>
+
+  <script>
+
+    let searchTimeout;
+    const loader = document.getElementById('loader')
+    const vendorsContainer = document.querySelector('.row.gy-4');
+
+    document.getElementById('vendorSearch').addEventListener('input', function () {
+      loader.classList.remove('visually-hidden');
+      vendorsContainer.classList.add('visually-hidden')
+      clearTimeout(searchTimeout);
+      const query = this.value;
+
+
+      searchTimeout = setTimeout(() => {
+        fetch(`/basic/web/site/search-vendors?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+            loader.classList.add('visually-hidden');
+            vendorsContainer.classList.remove('visually-hidden')
+
+            vendorsContainer.innerHTML = '';
+
+            data.vendors.forEach(vendor => {
+              vendorsContainer.innerHTML += `
+                        <div class="col-lg-4 col-md-6 col-12">
+                          <div class="allvendor-item">
+                            <h3>
+                              <a href="/site/exam?id=${vendor.id}">
+                                ${vendor.name}
+                              </a>
+                            </h3>
+                            <div class="vendor-info">
+                              <div class="certifications-exams">
+                                <div class="total-certifications">
+                                  Total Certificates: ${vendor.total_certifications}
+                                </div>
+                                <div class="total-exams">
+                                  Total Exams: ${vendor.total_exams}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    `;
+            });
+          });
+      }, 700);
+    });
+
+
+  </script>
